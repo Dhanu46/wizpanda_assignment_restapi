@@ -42,7 +42,7 @@ public class StudentController {
     }
 
     @PostMapping("/student/login")
-    public AuthenticationResponse login(@RequestBody LoginRequest loginRequest) throws StudentNotFoundException {
+    public ResponseEntity<AuthenticationResponse> login(@Valid @RequestBody LoginRequest loginRequest) throws StudentNotFoundException {
         return studentService.login(loginRequest);
     }
 

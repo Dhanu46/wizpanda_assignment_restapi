@@ -45,22 +45,23 @@ public class StudentService {
         student.setName(addStudentRequest.getName());
         student.setEmail(addStudentRequest.getEmail());
         student.setPassword(passwordEncoder.encode(addStudentRequest.getPassword()));
+        student.setPhoneNumber(addStudentRequest.getPhoneNumber());
         studentRepository.save(student);
         return ResponseEntity.status(201).body(student);
 
     }
 
-    public AuthenticationResponse login(LoginRequest loginRequest) throws StudentNotFoundException {
+    public ResponseEntity<AuthenticationResponse> login(LoginRequest loginRequest) throws StudentNotFoundException {
         Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUserName(),
                 loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authenticate);
         String token = jwtProvider.generateToken(authenticate);
-        return AuthenticationResponse.builder()
+        return ResponseEntity.status(200).body(AuthenticationResponse.builder()
                 .authenticationToken(token)
                 .refreshToken(refreshTokenService.generateRefreshToken().getToken())
                 .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
                 .username(loginRequest.getUserName())
-                .build();
+                .build());
     }
     public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) throws StudentNotFoundException {
         refreshTokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken());

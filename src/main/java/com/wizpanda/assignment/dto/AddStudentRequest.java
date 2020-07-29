@@ -27,7 +27,6 @@ public class AddStudentRequest {
     private String phoneNumber;
 
     @NotBlank(message = "Password Can't be Null")
-    @Min(message = "Password Should contain at least 8 characters",value = 8)
     @Pattern(message = "Password Should contain minimum eight characters, " +
             "at least one uppercase letter, one lowercase letter" +
             " on number, one special character",regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$")
