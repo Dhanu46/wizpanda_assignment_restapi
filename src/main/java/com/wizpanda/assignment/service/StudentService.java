@@ -9,15 +9,19 @@ import com.wizpanda.assignment.model.Student;
 import com.wizpanda.assignment.respository.StudentRepository;
 import com.wizpanda.assignment.security.JwtProvider;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
+
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -40,14 +44,14 @@ public class StudentService {
     }
 
     @Transactional
-    public ResponseEntity<Student> addStudent(AddStudentRequest addStudentRequest) {
+    public ResponseEntity<String> addStudent(AddStudentRequest addStudentRequest) {
         Student student = new Student();
         student.setName(addStudentRequest.getName());
         student.setEmail(addStudentRequest.getEmail());
         student.setPassword(passwordEncoder.encode(addStudentRequest.getPassword()));
         student.setPhoneNumber(addStudentRequest.getPhoneNumber());
         studentRepository.save(student);
-        return ResponseEntity.status(201).body(student);
+        return new  ResponseEntity<>("User Registration Successful", HttpStatus.OK);
 
     }
 
@@ -72,6 +76,20 @@ public class StudentService {
                 .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
                 .username(refreshTokenRequest.getUsername())
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public Student getCurrentUser(){
+        org.springframework.security.core.userdetails.User principal =
+                (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return studentRepository.findByName(principal.getUsername()).
+                orElseThrow(()-> new UsernameNotFoundException("Username not found - "+principal.getUsername()));
+    }
+
+    public boolean isLoggedIn(){
+        Authentication authentication
+                = SecurityContextHolder.getContext().getAuthentication();
+        return !(authentication instanceof AnonymousAuthenticationToken) && authentication.isAuthenticated();
     }
 
 }

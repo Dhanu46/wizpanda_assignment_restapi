@@ -49,7 +49,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .csrf()
                 .disable()
                 .authorizeRequests()
-                .antMatchers("/api/student/login","/api/student/create").permitAll()
+                .antMatchers("/api/auth/**","/api/student/create").permitAll()
                 .anyRequest()
                 .authenticated();
 
